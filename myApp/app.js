@@ -20,7 +20,7 @@ app.get("/registration", (req, res) => {
 });
 
 app.get("/home", (req, res) => {
-	res.render("registration");
+	res.render("home");
 });
 
 app.get("/books", (req, res) => {
@@ -69,6 +69,10 @@ app.get("/tennis", (req, res) => {
 
 app.post("/", (req, res) => {
 	res.render("home");
+});
+
+app.post("/search", (req, res) => {
+	res.render("searchresults");
 });
 
 app.listen(6969);
