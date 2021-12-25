@@ -12,7 +12,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
-	res.render("index", { title: "Express" });
+	res.render("login");
+});
+
+app.get("registration", (req, res) => {
+	res.render("registration");
 });
 
 app.listen(6969);
