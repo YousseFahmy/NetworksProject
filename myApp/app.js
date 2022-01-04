@@ -1,17 +1,33 @@
 var express = require("express");
 var path = require("path");
+var alert = require("alert");
+var session = require("express-session");
+const morgan = require("morgan");
 
 var app = express();
 var usersDB;
 var productsDB;
 
-// view engine setup
+app.use(morgan("tiny"));
+
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(session({ secret: "thisprojectisannoying", resave: false, saveUninitialized: false }));
+
+app.use((req, res, next) => {
+	const allowedPages = [ "/", "/login", "/registration" ];
+	if (req.method === "GET") {
+		if (allowedPages.includes(req.path) || req.session.username) {
+			return next();
+		}
+		res.redirect("/");
+	}
+	return next();
+});
 
 app.get("/", (req, res) => {
 	res.render("login");
@@ -54,6 +70,8 @@ app.get("/phones", (req, res) => {
 });
 
 app.get("/searchresults", (req, res) => {
+	console.log(res.param);
+	console.log("bedan");
 	res.render("searchresults");
 });
 
@@ -76,14 +94,11 @@ app.post("/", async (req, res) => {
 	var userExists = await findUser(usernameIn, passwordIn);
 
 	if (userExists) {
-		res.render("home");
+		req.session.username = usernameIn;
+		res.redirect("home");
 	} else {
 		throwThisError("Invalid Credentials");
 	}
-});
-
-app.post("/search", (req, res) => {
-	res.render("searchresults");
 });
 
 app.post("/register", async (req, res) => {
@@ -93,10 +108,18 @@ app.post("/register", async (req, res) => {
 	var successfulRegistration = await registerUser(usernameIn, passwordIn);
 
 	if (successfulRegistration) {
-		res.render("login");
+		req.session.username = usernameIn;
+		res.redirect("/home");
 	} else {
 		res.render("registration");
 	}
+});
+
+app.post("/search", async (req, res) => {
+	var searchParam = req.body.Search;
+	var searchResults = await searchProducts(searchParam);
+	console.log(searchResults);
+	res.render("searchresults", { searchResults });
 });
 
 async function main() {
@@ -154,7 +177,32 @@ async function findUser(usernameIn, passwordIn) {
 }
 
 function throwThisError(message) {
-	console.log(`ERROR: ${message}`);
+	alert(`ERROR: ${message}`, "cscript");
+}
+
+async function searchProducts(searchParam) {
+	var allProds = await productsDB.find().toArray();
+	var validProds = [];
+
+	allProds.forEach((product) => {
+		var prodName = product["productName"].toLowerCase();
+		if (prodName.includes(searchParam)) {
+			validProds.push(product);
+		}
+	});
+
+	return validProds;
+}
+
+async function addToCart(itemPage) {
+	var productID = await findProductID(itemPage);
+}
+
+async function findProductID(itemPage) {
+	var itemDoc = await productsDB.findOne({ productPage: itemPage });
+	console.log(itemDoc);
+	console.log("5ara");
+	// TODO
 }
 
 main();

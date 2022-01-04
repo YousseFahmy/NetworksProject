@@ -13,6 +13,34 @@
             text-align: center;
             -webkit-text-stroke: 1px blue;
         }
+
+        #resultsDiv{
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .productInstance{
+            background-color : rgb(54, 54, 54);
+            width : 90%;
+            padding : 10px;
+            margin : 10px;
+            border-radius: 5px;
+        }
+
+        .productHeading{
+            text-align: center;
+            display: block;
+        }
+
+        .productHeading a{
+            color : rgb(0, 99, 66);
+        }
+
+        #noResults{
+            text-align: center;
+            color: chartreuse;
+        }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,5 +66,15 @@
             </form>
         </div>
     </nav>
+    <div id="resultsDiv">
+        <% for(var result of searchResults){ %>
+            <div class="productInstance">
+                <h2 class="productHeading"><a href="/<%= result.productPage %>"><%= result.productName %></a></h2>
+            </div>
+        <% } %>
+    </div>
+    <% if (searchResults.length === 0) { %>
+        <h2 id="noResults">No Results Found</h2>
+    <% } %>
 </body>
 </html>
