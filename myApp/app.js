@@ -230,11 +230,8 @@ async function findProductName(itemPage) {
 }
 
 main();
-app.listen(6969, () => {
-	console.log("Running");
-});
-/* if (process.env.PORT) {
+if (process.env.PORT) {
 	app.listen(process.env.PORT, () => console.log("Server started on Heroku"));
 } else {
 	app.listen(6969, () => console.log("Server started on Port 6969"));
-} */
+}
