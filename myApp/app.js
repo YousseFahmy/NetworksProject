@@ -206,4 +206,8 @@ async function findProductID(itemPage) {
 }
 
 main();
-app.listen(6969);
+if (process.env.PORT) {
+	app.listen(process.env.PORT, () => console.log("Server started on Heroku"));
+} else {
+	app.listen(6969, () => console.log("Server started on Port 6969"));
+}
