@@ -183,7 +183,7 @@ async function findUser(usernameIn, passwordIn) {
 }
 
 function throwThisError(message) {
-	alert(`ERROR: ${message}`, "cscript");
+	alert(`ERROR: ${message}`);
 }
 
 async function searchProducts(searchParam) {
