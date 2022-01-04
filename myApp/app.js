@@ -18,7 +18,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "thisprojectisannoying", resave: false, saveUninitialized: false }));
 
 app.use((req, res, next) => {
-	res.locals.messages = req.flash("error");
+	res.locals.messages = req.flash("Error");
+	next();
 });
 
 app.use((req, res, next) => {
@@ -102,7 +103,7 @@ app.post("/", async (req, res) => {
 		req.session.username = usernameIn;
 		res.redirect("home");
 	} else {
-		req.flash("Error", "Username Already Exists");
+		req.flash("Error", "Invalid username or password");
 		res.redirect("/");
 	}
 });
@@ -118,7 +119,7 @@ app.post("/register", async (req, res) => {
 		res.redirect("/home");
 	} else {
 		req.flash("Error", "Registration unsuccessful");
-		res.render("/registration");
+		res.redirect("/registration");
 	}
 });
 
@@ -132,10 +133,10 @@ app.post("/search", async (req, res) => {
 app.post("/addToCart", async (req, res) => {
 	var success = await addToCart(req.body.itemPage, req.session.username);
 	if (success) {
-		res.render("/home");
+		res.redirect("/home");
 	} else {
 		req.flash("Error", "Item Already in Cart.");
-		res.render(req.body.itemPage);
+		res.redirect(req.body.itemPage);
 	}
 });
 

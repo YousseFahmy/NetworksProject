@@ -18,6 +18,10 @@
             top:50px;
             color: white;
         }
+        #FlashErrors{
+            color:firebrick;
+            text-align: center;
+        }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,6 +34,7 @@
 <body>
     <div class="container">
         <h1>Welcome</h1>
+        <h4 id="FlashErrors"><%= messages %></h4>
     </div>
     <div class="cont">
         <form method="POST">
