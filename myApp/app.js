@@ -1,20 +1,26 @@
-var express = require("express");
-var path = require("path");
-var alert = require("alert");
-var session = require("express-session");
+const express = require("express");
+const path = require("path");
+const flash = require("connect-flash");
+const session = require("express-session");
 const morgan = require("morgan");
 
-var app = express();
+const app = express();
 var usersDB;
 var productsDB;
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "thisprojectisannoying", resave: false, saveUninitialized: false }));
+
+app.use((req, res, next) => {
+	res.locals.messages = req.flash("Error");
+	next();
+});
 
 app.use((req, res, next) => {
 	const allowedPages = [ "/", "/login", "/registration" ];
@@ -97,7 +103,8 @@ app.post("/", async (req, res) => {
 		req.session.username = usernameIn;
 		res.redirect("home");
 	} else {
-		throwThisError("Invalid Credentials");
+		req.flash("Error", "Invalid username or password");
+		res.redirect("/");
 	}
 });
 
@@ -111,7 +118,8 @@ app.post("/register", async (req, res) => {
 		req.session.username = usernameIn;
 		res.redirect("/home");
 	} else {
-		res.render("registration");
+		req.flash("Error", "Registration unsuccessful");
+		res.redirect("/registration");
 	}
 });
 
@@ -123,8 +131,13 @@ app.post("/search", async (req, res) => {
 });
 
 app.post("/addToCart", async (req, res) => {
-	await addToCart(req.body.itemPage, req.session.username);
-	res.render(req.body.itemPage);
+	var success = await addToCart(req.body.itemPage, req.session.username);
+	if (success) {
+		res.redirect("/home");
+	} else {
+		req.flash("Error", "Item Already in Cart.");
+		res.redirect(req.body.itemPage);
+	}
 });
 
 async function main() {
@@ -144,10 +157,6 @@ async function registerUser(usernameIn, passwordIn) {
 	if (!theUser && usernameIn != "" && passwordIn != "") {
 		createUser(usernameIn, passwordIn);
 		return true;
-	} else if (theUser) {
-		throwThisError("Username already exists.");
-	} else {
-		throwThisError("Invalid Credentials.");
 	}
 	return false;
 }
@@ -182,10 +191,6 @@ async function findUser(usernameIn, passwordIn) {
 	}
 }
 
-function throwThisError(message) {
-	alert(`ERROR: ${message}`);
-}
-
 async function searchProducts(searchParam) {
 	var allProds = await productsDB.find().toArray();
 	var validProds = [];
@@ -206,7 +211,7 @@ async function addToCart(itemPage, username) {
 	var oldCart = userDoc.cart;
 
 	if (oldCart.includes(productName)) {
-		throwThisError("Item already in cart.");
+		return false;
 	} else {
 		if (oldCart) {
 			var newCart = [ ...oldCart, productName ];
@@ -216,6 +221,7 @@ async function addToCart(itemPage, username) {
 
 		await usersDB.updateOne({ username: username }, { $set: { cart: newCart } });
 	}
+	return true;
 }
 
 async function findProductName(itemPage) {
