@@ -13,6 +13,30 @@
             text-align: center;
             -webkit-text-stroke: 1px blue;
         }
+        #resultsDiv{
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .itemInstance{
+            background-color : rgb(54, 54, 54);
+            width : 90%;
+            padding : 10px;
+            margin : 10px;
+            border-radius: 5px;
+        }
+
+        .itemName{
+            text-align: center;
+            display: block;
+            color : rgb(40, 167, 69);
+        }
+
+        #noResults{
+            text-align: center;
+            color: rgb(40, 167, 69);
+        }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,5 +62,15 @@
             </form>
         </div>
     </nav>
+    <div id="resultsDiv">
+        <% for(var itemName of userCart){ %>
+            <div class="itemInstance">
+                <h2 class="itemName"><%= itemName %> </h2>
+            </div>
+        <% } %>
+    </div>
+    <% if (userCart.length === 0) { %>
+        <h2 id="noResults">Cart Empty</h2>
+    <% } %>
 </body>
 </html>

@@ -77,7 +77,10 @@
         From Rupi Kaur, the #1 New York Times bestselling author of milk and honey, comes her long-awaited second collection of poetry. A vibrant and transcendent journey about growth and healing. Ancestry and honoring one’s roots. Expatriation and rising up to find a home within yourself.
     </div>
     <div class="cart">
-        <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        <form action="addToCart" method="post">
+            <input type="text" name="itemPage" value="sun" style="display:none">
+            <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        </form>
     </div>
     <div class="video">
         <iframe width="480" height="360" 

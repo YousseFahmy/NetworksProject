@@ -77,7 +77,10 @@
         Three-Station Heavy Duty Punching Bag Stand by Everlast, 54.00 x 54.00 x 84.00 Inches.
     </div>
     <div class="cart">
-        <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        <form action="addToCart" method="post">
+            <input type="text" name="itemPage" value="boxing" style="display:none">
+            <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        </form>
     </div>
     <div class="video">
         <iframe width="480" height="360" 

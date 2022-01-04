@@ -77,7 +77,10 @@
             2021 New Professional-grade Wilson 1Pc Hend Carbon Fiber Tennis Racket.
     </div>
     <div class="cart">
-        <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        <form action="addToCart" method="post">
+            <input type="text" name="itemPage" value="tennis" style="display:none">
+            <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        </form>
     </div>
     <div class="video">
         <iframe width="480" height="360" 

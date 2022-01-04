@@ -76,7 +76,10 @@
         The iPhone 13 Pro and iPhone 13 Pro Max are smartphones designed and marketed by Apple Inc. They are the flagship smartphones in the fifteenth generation of the iPhone, succeeding the iPhone 12 Pro and iPhone 12 Pro Max.
     </div>
     <div class="cart">
-        <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        <form action="addToCart" method="post">
+            <input type="text" name="itemPage" value="iphone" style="display:none">
+            <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
+        </form>
     </div>
     <div class="video">
         <iframe width="480" height="360" 

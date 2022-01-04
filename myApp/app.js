@@ -8,7 +8,7 @@ var app = express();
 var usersDB;
 var productsDB;
 
-app.use(morgan("tiny"));
+app.use(morgan("common"));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -49,8 +49,10 @@ app.get("/boxing", (req, res) => {
 	res.render("boxing");
 });
 
-app.get("/cart", (req, res) => {
-	res.render("cart");
+app.get("/cart", async (req, res) => {
+	var userDoc = await usersDB.findOne({ username: req.session.username });
+	var userCart = userDoc.cart;
+	res.render("cart", { userCart });
 });
 
 app.get("/galaxy", (req, res) => {
@@ -122,6 +124,11 @@ app.post("/search", async (req, res) => {
 	res.render("searchresults", { searchResults });
 });
 
+app.post("/addToCart", async (req, res) => {
+	await addToCart(req.body.itemPage, req.session.username);
+	res.render(req.body.itemPage);
+});
+
 async function main() {
 	var { MongoClient } = require("mongodb");
 	var uri =
@@ -150,7 +157,8 @@ async function registerUser(usernameIn, passwordIn) {
 async function createUser(usernameIn, passwordIn) {
 	var newUser = {
 		username: usernameIn,
-		password: passwordIn
+		password: passwordIn,
+		cart: []
 	};
 
 	await usersDB.insertOne(newUser);
@@ -194,15 +202,27 @@ async function searchProducts(searchParam) {
 	return validProds;
 }
 
-async function addToCart(itemPage) {
-	var productID = await findProductID(itemPage);
+async function addToCart(itemPage, username) {
+	var productName = await findProductName(itemPage);
+	var userDoc = await usersDB.findOne({ username: username });
+	var oldCart = userDoc.cart;
+
+	if (oldCart.includes(productName)) {
+		throwThisError("Item already in cart.");
+	} else {
+		if (oldCart) {
+			var newCart = [ ...oldCart, productName ];
+		} else {
+			var newCart = [ productName ];
+		}
+
+		await usersDB.updateOne({ username: username }, { $set: { cart: newCart } });
+	}
 }
 
-async function findProductID(itemPage) {
+async function findProductName(itemPage) {
 	var itemDoc = await productsDB.findOne({ productPage: itemPage });
-	console.log(itemDoc);
-	console.log("5ara");
-	// TODO
+	return itemDoc.productName;
 }
 
 main();
