@@ -1,20 +1,25 @@
-var express = require("express");
-var path = require("path");
-var alert = require("alert");
-var session = require("express-session");
+const express = require("express");
+const path = require("path");
+const flash = require("connect-flash");
+const session = require("express-session");
 const morgan = require("morgan");
 
-var app = express();
+const app = express();
 var usersDB;
 var productsDB;
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "thisprojectisannoying", resave: false, saveUninitialized: false }));
+
+app.use((req, res, next) => {
+	res.locals.messages = req.flash("error");
+});
 
 app.use((req, res, next) => {
 	const allowedPages = [ "/", "/login", "/registration" ];
@@ -97,7 +102,8 @@ app.post("/", async (req, res) => {
 		req.session.username = usernameIn;
 		res.redirect("home");
 	} else {
-		throwThisError("Invalid Credentials");
+		req.flash("Error", "Username Already Exists");
+		res.redirect("/");
 	}
 });
 
@@ -111,7 +117,8 @@ app.post("/register", async (req, res) => {
 		req.session.username = usernameIn;
 		res.redirect("/home");
 	} else {
-		res.render("registration");
+		req.flash("Error", "Registration unsuccessful");
+		res.render("/registration");
 	}
 });
 
@@ -123,8 +130,13 @@ app.post("/search", async (req, res) => {
 });
 
 app.post("/addToCart", async (req, res) => {
-	await addToCart(req.body.itemPage, req.session.username);
-	res.render(req.body.itemPage);
+	var success = await addToCart(req.body.itemPage, req.session.username);
+	if (success) {
+		res.render("/home");
+	} else {
+		req.flash("Error", "Item Already in Cart.");
+		res.render(req.body.itemPage);
+	}
 });
 
 async function main() {
@@ -144,10 +156,6 @@ async function registerUser(usernameIn, passwordIn) {
 	if (!theUser && usernameIn != "" && passwordIn != "") {
 		createUser(usernameIn, passwordIn);
 		return true;
-	} else if (theUser) {
-		throwThisError("Username already exists.");
-	} else {
-		throwThisError("Invalid Credentials.");
 	}
 	return false;
 }
@@ -182,10 +190,6 @@ async function findUser(usernameIn, passwordIn) {
 	}
 }
 
-function throwThisError(message) {
-	alert(`ERROR: ${message}`, "cscript");
-}
-
 async function searchProducts(searchParam) {
 	var allProds = await productsDB.find().toArray();
 	var validProds = [];
@@ -206,7 +210,7 @@ async function addToCart(itemPage, username) {
 	var oldCart = userDoc.cart;
 
 	if (oldCart.includes(productName)) {
-		throwThisError("Item already in cart.");
+		return false;
 	} else {
 		if (oldCart) {
 			var newCart = [ ...oldCart, productName ];
@@ -216,6 +220,7 @@ async function addToCart(itemPage, username) {
 
 		await usersDB.updateOne({ username: username }, { $set: { cart: newCart } });
 	}
+	return true;
 }
 
 async function findProductName(itemPage) {
@@ -224,8 +229,11 @@ async function findProductName(itemPage) {
 }
 
 main();
-if (process.env.PORT) {
+app.listen(6969, () => {
+	console.log("Running");
+});
+/* if (process.env.PORT) {
 	app.listen(process.env.PORT, () => console.log("Server started on Heroku"));
 } else {
 	app.listen(6969, () => console.log("Server started on Port 6969"));
-}
+} */
