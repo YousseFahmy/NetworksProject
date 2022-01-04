@@ -77,7 +77,6 @@ app.get("/phones", (req, res) => {
 
 app.get("/searchresults", (req, res) => {
 	console.log(res.param);
-	console.log("bedan");
 	res.render("searchresults");
 });
 
